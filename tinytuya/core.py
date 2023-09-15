@@ -851,7 +851,7 @@ class XenonDevice(object):
             time.sleep(0.1)
         elif '/' in address:
             # Force scan address range
-            with open('snapshot.json', 'r+') as s:
+            with open('snapshot.json', 'a+') as s:
                 content = s.read()
                 if len(content) == 0:
                     content = '{}'
