@@ -849,6 +849,25 @@ class XenonDevice(object):
             self.address = bcast_data['ip']
             self.set_version(float(bcast_data['version']))
             time.sleep(0.1)
+        elif '/' in address:
+            # Force scan address range
+            with open('snapshot.json', 'r+') as s:
+                content = s.read()
+                if len(content) == 0:
+                    content = '{}'
+                snapshot = json.loads(content)
+                if self.id not in snapshot:
+                    devices = deviceScan(forcescan=[address], byID=True, poll=False)
+                    snapshot = {**snapshot, **devices}
+                    s.seek(0)
+                    s.truncate(0)
+                    s.write(json.dumps(snapshot, indent=2))
+                if self.id not in snapshot:
+                    log.debug("Unable to find device on network (specify IP address)")
+                    raise Exception("Unable to find device on network (specify IP address)")
+                self.address = snapshot[self.id]['ip']
+                self.set_version(float(snapshot[self.id]['version']))
+                time.sleep(0.1)
         elif version:
             self.set_version(float(version))
         else:
